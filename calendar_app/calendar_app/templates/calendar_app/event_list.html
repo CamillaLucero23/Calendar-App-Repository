@@ -1,0 +1,20 @@
+<!-- inherit from base.html-->
+{% extends "calendar_app/base_template.html" %}
+
+<!-- Replace block content in base_template.html -->
+{% block content %}
+<h1>Events</h1>
+
+    {%if event_list %}
+        <ul>
+            {% for events in event_list %}
+            <li>
+                <p><strong>{{events.title}}</strong>
+
+            </li>
+            {% endfor %}
+        </ul>
+    {%else%}
+        <p>There are no events currently.</p>
+    {%endif%}
+{%endblock%}

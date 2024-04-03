@@ -10,6 +10,7 @@ class Event(models.Model):
     description = models.CharField(max_length=400)
     date_time = models.DateTimeField()
     is_active = models.BooleanField(default=False)
+    #Insert Variable here so events are linked to a calendar (EVENTUALLY)
 
     #Model Methods
     #Gets the name of the event and uses that for their display on /admin
