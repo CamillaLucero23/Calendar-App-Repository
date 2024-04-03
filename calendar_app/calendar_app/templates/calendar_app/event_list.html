@@ -7,14 +7,18 @@
 
     {%if event_list %}
         <ul>
-            {% for events in event_list %}
-            <li>
-                <p><strong>{{events.title}}</strong>
-
-            </li>
+            {% for event in event_list %}
+                <div class="container-fluid">
+                    
+                    <p><strong>{{event.title}}</strong>
+                    <a href="{{event.get_absolute_url}}" class="btn btn-primary" role="button">View</a>
+        
+                </div>
             {% endfor %}
         </ul>
     {%else%}
         <p>There are no events currently.</p>
     {%endif%}
+
+    <a href="{% url 'create-event' %}" class="btn btn-primary" role="button">Create New</a>
 {%endblock%}
