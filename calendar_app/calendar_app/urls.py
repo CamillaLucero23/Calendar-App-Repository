@@ -9,3 +9,4 @@ urlpatterns = [
     path('event/<int:pk>/update-event', views.update_event, name='update-event'), #Update Event Form
     path('event/<int:pk>/delete-event', views.delete_event, name='delete-event'), #Delete Event Form
     ]
+

@@ -8,7 +8,8 @@ class Event(models.Model):
     #Model Variables
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=400)
-    date_time = models.DateTimeField()
+    date = models.DateField()
+    time = models.TimeField()
     is_active = models.BooleanField(default=False)
     #Insert Variable here so events are linked to a calendar (EVENTUALLY)
 

@@ -3,13 +3,40 @@
 
 <!-- Replace block content in base_template.html -->
 {% block content %}
+    <h2>Create A New Form</h1>
+    <h2>Please fill out the following fields</h2>
 
     <form action="create-event" method="POST">
-        {% csrf_token%}
-        <table>
-        {{form.as_table}}
-        </table>
-        <input type="submit" name="Submit">
+        {% csrf_token %}
+        <div class="container_fluid">
+            <div class='row'>
+             <div class='col'>
+                 <div class="form-group">
+                     <p> Event Title </p>
+                     {{ form.title }}
+                 </div>
+                 <div class="form-group">
+                     <p> Event Description </p>
+                     {{ form.description }}
+                 </div>
+                 <div class="form-group">
+                     <p>Enter the date of your event: {{ form.date }}</p> 
+                 </div>
+                 <div class="form-group">
+                     <p>Enter the time of your event (Utilizes Military Time): {{ form.time }}</p> 
+                 </div>
+                 <div class="form-group">
+                     <p> Would you like to classify your event as active? {{ form.is_active }}</p> 
+                 </div>
+             </div>
+             
+             <div class="form-group">
+                 <input class="btn btn-primary" type="submit" value="Submit">
+                 <a href="{% url 'event' %}" class="btn btn-primary" role="button">Back</a>
+             </div>
+         
+             </div>
+            </div>
     
     </form>
 
