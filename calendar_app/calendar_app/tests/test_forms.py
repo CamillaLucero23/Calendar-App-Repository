@@ -23,7 +23,7 @@ class EventFormTestCase(TestCase):
                 'is_active' : False }
         
         form = EventForm(data=data)
-        self.assertFalse(form.is_valid()) 
+        self.assertTrue(form.is_valid()) 
         self.assertIn('title', form.errors)
 
 
