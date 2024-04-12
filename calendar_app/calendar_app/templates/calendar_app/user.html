@@ -1,0 +1,18 @@
+{% extends 'calendar_app/base_template.html'%}
+{% block content %}
+
+<div>
+    <h2>Tempo Member Profile</h2>
+    Welcome, {{user}}
+    
+    <h1>Member Info</h1>
+    <form method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input class= "btn btn-primary" type="submit" name="Update">
+    </form>
+    
+    <p><strong> Your Calendar:</strong></p>
+        <a href="{{user.member.calendar.get_absolute_url}}" class="btn btn-primary" role="button">View</a>
+    
+</div>

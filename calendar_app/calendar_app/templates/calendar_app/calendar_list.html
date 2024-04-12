@@ -1,0 +1,23 @@
+<!-- inherit from base.html-->
+{% extends "calendar_app/base_template.html" %}
+
+<!-- Replace block content in base_template.html -->
+{% block content %}
+<h2>Calendars</h1>
+
+    {%if calendar_list %}
+        <ul>
+            {% for calendar in calendar_list %}
+                <div class="container-fluid">
+                    
+                    <p><strong>{{calendar.member.user.username}}'s Calendar</strong>
+                    <a href="{{calendar.get_absolute_url}}" class="btn btn-primary" role="button">View</a>
+        
+                </div>
+            {% endfor %}
+        </ul>
+    {%else%}
+        <p>There are no Calendars currently.</p>
+    {%endif%}
+
+{%endblock%}
