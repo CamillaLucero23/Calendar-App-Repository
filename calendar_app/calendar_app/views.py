@@ -6,6 +6,9 @@ from .forms import *
 from .decorators import *
 from django.views import generic
 
+from django.contrib.auth.models import User, Permission
+from django.contrib.contenttypes.models import ContentType
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
@@ -59,6 +62,7 @@ def create_event(request, pk):
     context = {'form': form}
     return render(request, 'calendar_app/create_event.html', context)
 
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def update_event(request, calendar_id, pk):
@@ -76,26 +80,31 @@ def update_event(request, calendar_id, pk):
             event.save()
 
             #redirect
-            return redirect('event-detail', event.id)
+            return redirect('calendar-detail', pk)
     
     context = {'form': form}
     return render(request, 'calendar_app/update_event.html', context)
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
-def delete_event(request, pk):
-    event = Event.objects.get(id=pk)
+def delete_event(request, pk, calendar_id):
+    if request.user.has_perm('calendar_app.can_edit_calendar'):
+        event = Event.objects.get(id=pk)
   
-    if request.method == 'POST':
+        if request.method == 'POST':
         
-        #delete form if post
-        event.delete()
+            #delete form if post
+            event.delete()
 
-        #redirect
-        return redirect('event')
+            #redirect
+            return redirect('event')
     
-    context = {'event' : event}
-    return render(request, 'calendar_app/delete_event.html', context)
+        context = {'event' : event}
+        return render(request, 'calendar_app/delete_event.html', context)
+    
+    else:
+        #redirect
+            return redirect('/')
 
 
 def registerPage(request):
@@ -110,11 +119,15 @@ def registerPage(request):
             group = Group.objects.get(name='user_role')
             user.groups.add(group)
 
-            member = Member.objects.create(user=user)
             calendar = Calendar.objects.create()
+            content_type = ContentType.objects.get_for_model(calendar)
+            permission = Permission.objects.get(codename='can_edit_calendar', content_type=content_type)
+            user.user_permissions.add(permission)
+
+            member = Member.objects.create(user=user)
             member.calendar = calendar
+
             member.save()
-            
             return redirect('login')
     
     context = {'form' : form}
@@ -133,4 +146,4 @@ def userPage(request):
             form.save()
 
     context = {'calendars':calendar, 'form':form}
-    return render(request, 'portfolio_app/user.html', context) 
+    return render(request, 'calendar_app/user.html', context) 

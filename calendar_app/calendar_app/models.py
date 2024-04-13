@@ -21,6 +21,20 @@ class Member(models.Model):
     user = models.OneToOneField(User,null=True, on_delete=models.CASCADE) #connects user to calendars
     calendar = models.OneToOneField(Calendar,null=True, on_delete=models.CASCADE)
 
+    class Meta:
+        permissions = [
+            ("can_edit_calendar", "Can Edit Calendar"),
+        ]
+    #Gets the name of the em and uses that for their display on /admin
+    def __str__(self):
+        return self.first_name
+    
+    #Gets URL to access instance of model
+    def get_absolute_url(self):
+        """Returns the URL to access a particular instance of the model."""
+        return reverse('calendar-detail', args=[str(self.id)])
+
+
 class Event(models.Model):
 
     #Model Variables

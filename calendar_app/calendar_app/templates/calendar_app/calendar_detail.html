@@ -14,8 +14,8 @@
         <p><strong>Time: </strong> {{event.time}}</p>
         <p><strong>Is Active?: </strong> {{event.is_active}}</a>
             <div class="btn-group">
-                <a href="{% url 'update-event' calendar.id event.id %}" class="btn btn-primary" role="button">Update</a>
-                <a href="{% url 'delete-event' calendar.id event.id %}" class="btn btn-danger" role="button">Delete</a>
+                <a href="{% url 'update-event' event.calendar.id event.id %}" class="btn btn-primary" role="button">Update</a>
+                <a href="{% url 'delete-event' event.calendar.id event.id %}" class="btn btn-danger" role="button">Delete</a>
                 <a href="{% url 'calendar' %}" class="btn btn-primary" role="button">Back</a>
             </div>
         {% endif %}
