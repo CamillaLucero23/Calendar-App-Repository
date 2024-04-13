@@ -1,0 +1,26 @@
+<!-- inherit from base.html-->
+{% extends "calendar_app/base_template.html" %}
+
+<!-- Replace block content in base_template.html -->
+{% block content %}
+<h2>{{calendar.member.user.username}}'s Calendar - Detail View </h2>
+
+{% if events %}
+    {% for event in events %}
+        {% if event.is_active %}
+        <p><strong>Title: </strong> {{event.title}}</p>
+        <p><strong>Description: </strong> {{event.description}}</p>
+        <p><strong>Date: </strong> {{event.date}}</p>
+        <p><strong>Time: </strong> {{event.time}}</p>
+        <p><strong>Is Active?: </strong> {{event.is_active}}</a>
+            <div class="btn-group">
+                <a href="{% url 'update-event' event.calendar.id event.id %}" class="btn btn-primary" role="button">Update</a>
+                <a href="{% url 'delete-event' event.calendar.id event.id %}" class="btn btn-danger" role="button">Delete</a>
+                <a href="{% url 'calendar' %}" class="btn btn-primary" role="button">Back</a>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <p>{{calendar.member.user.username}} has no active events currently.</p>
+{% endif %}
+{%endblock%}

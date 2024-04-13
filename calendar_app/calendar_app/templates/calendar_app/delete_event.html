@@ -9,8 +9,8 @@
 
 <form action="delete-event" method="post">
 {% csrf_token %}
-<input type="submit" value="Delete">
-<a href="{{event.get_absolute_url}}" class="btn btn-primary" role="button">Back</a>
+<input class="btn btn-primary" type="submit" value="Delete">
+<a href="{% url 'event-detail' event.calendar.id event.id %}" class="btn btn-primary" role="button">Back</a>
 </form>
 
 {%endblock%}
