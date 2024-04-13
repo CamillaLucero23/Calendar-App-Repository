@@ -1,17 +1,22 @@
 from typing import Any
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import *
 from .forms import *
 from .decorators import *
+from datetime import datetime,timedelta
+import calendar
+from django.http import HttpResponse
 from django.views import generic
-
+from django.utils.safestring import mark_safe
+from .utils import CalendarUtil
+from django.views import generic
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+ 
 
 # Create your views here.
 
@@ -24,6 +29,31 @@ class EventDetailView(generic.DetailView):
 class CalendarListView(generic.ListView):
     model = Calendar
 
+class CalendarEventList(generic.ListView):
+    model = Event
+    template_name = 'calendar_app/calendar.html'
+
+    def get_date(self,req_day):
+        if req_day:
+            year, month = (int(x) for x in req_day.split('-'))
+            return datetime.date(year, month, day=1)
+        return datetime.today()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # use today's date for the calendar
+        date = self.get_date(self.request.GET.get('day', None))
+
+        # Instantiate our calendar class with today's year and date
+        calendar = CalendarUtil(date.year, date.month)
+
+        # Call the formatmonth method, which returns our calendar as a table
+        html_cal = calendar.formatmonth(withyear=True)
+        context['calendar'] = mark_safe(html_cal)
+        return context
+
+
 class CalendarDetailView(generic.DetailView):
     model = Calendar
 
@@ -35,6 +65,9 @@ class CalendarDetailView(generic.DetailView):
         events = Event.objects.filter(calendar=self.get_object().id)
         context['events'] = events
         return context
+    
+def no_permission(request):
+    return render( request, 'calendar_app/no_permission.html')
 
 #------------------------------------------------------------------------------------------
 #Forms & Such
@@ -42,25 +75,30 @@ class CalendarDetailView(generic.DetailView):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def create_event(request, pk):
-    form = EventForm()
-    calendar = Calendar.objects.get(pk=pk)
-    if request.method == 'POST':
-        #create a new dictionary with form data
-        event_data = request.POST.copy()
-        event_data['calendar'] = pk
-        form = EventForm(event_data)
+    post = get_object_or_404(Calendar, pk=pk)
+    if request.user.has_perm('calendar.can_edit_calendar', post):
+        form = EventForm()
+        calendar = Calendar.objects.get(pk=pk)
+        if request.method == 'POST':
+            #create a new dictionary with form data
+            event_data = request.POST.copy()
+            event_data['calendar'] = pk
+            form = EventForm(event_data)
 
-        if form.is_valid():
-            #Save form without committing
-            event = form.save(commit=False)
-            event.calendar = calendar
-            event.save()
+            if form.is_valid():
+                #Save form without committing
+                event = form.save(commit=False)
+                event.calendar = calendar
+                event.save()
 
             #redirect
             return redirect('calendar-detail', pk)
     
-    context = {'form': form}
-    return render(request, 'calendar_app/create_event.html', context)
+        context = {'form': form}
+        return render(request, 'calendar_app/create_event.html', context)
+    else:
+        return render(request, "calendar_app/no_permission.html")
+
 
 
 @login_required(login_url='login')
@@ -120,8 +158,7 @@ def registerPage(request):
             user.groups.add(group)
 
             calendar = Calendar.objects.create()
-            content_type = ContentType.objects.get_for_model(calendar)
-            permission = Permission.objects.get(codename='can_edit_calendar', content_type=content_type)
+            permission = Permission.objects.get(codename='can_edit_calendar')
             user.user_permissions.add(permission)
 
             member = Member.objects.create(user=user)

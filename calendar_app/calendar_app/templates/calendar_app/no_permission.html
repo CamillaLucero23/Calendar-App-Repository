@@ -1,0 +1,13 @@
+<!-- inherit from base.html-->
+{% extends "calendar_app/base_template.html" %}
+
+<!-- Replace block content in base_template.html -->
+{% block content %}
+    <h2>You do not have permission to edit this calendar!</h2>
+    <div class="container_fluid">
+        <a href="/ " class="btn btn-primary" role="button">Back To Homepage</a>
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary" role="button">Login</a>
+
+    </div>
+    
+{%endblock%}

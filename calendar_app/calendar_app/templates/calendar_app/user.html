@@ -14,6 +14,7 @@
     
     <p><strong> Your Calendar:</strong></p>
         <a href="{{user.member.calendar.get_absolute_url}}" class="btn btn-primary" role="button">View</a>
+        <a href="{% url 'create-event' user.member.calendar.id %}" class="btn btn-primary" role="button">Add Event</a>
     
 </div>
 
