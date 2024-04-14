@@ -75,8 +75,8 @@ def no_permission(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def create_event(request, pk):
-    post = get_object_or_404(Calendar, pk=pk)
-    if request.user.has_perm('calendar.can_edit_calendar', post):
+    #post = get_object_or_404(Calendar, pk=pk)
+    #if request.user.has_perm('calendar_app.can_edit_calendar', post):
         form = EventForm()
         calendar = Calendar.objects.get(pk=pk)
         if request.method == 'POST':
@@ -96,8 +96,8 @@ def create_event(request, pk):
     
         context = {'form': form}
         return render(request, 'calendar_app/create_event.html', context)
-    else:
-        return render(request, "calendar_app/no_permission.html")
+    #else:
+        #return render(request, "calendar_app/no_permission.html")
 
 
 
@@ -135,7 +135,7 @@ def delete_event(request, pk, calendar_id):
             event.delete()
 
             #redirect
-            return redirect('event')
+            return redirect('calendar-detail', pk)
     
         context = {'event' : event}
         return render(request, 'calendar_app/delete_event.html', context)

@@ -5,6 +5,19 @@ from calendar_app.models import *
 
 class EventViewsTestCase(TestCase):
     def setUp(self):
+        self.user = User.objects.create_user(username='TestUser', password='testuser')
+
+        self.calendar = Calendar.objects.create(
+            
+        )
+
+        self.member = Member.objects.create(
+            first_name = "Test",
+            last_name = "User",
+            user = self.user,
+            calendar = self.calendar
+
+        )
 
         #Create a test event
         self.event = Event.objects.create(
@@ -12,7 +25,8 @@ class EventViewsTestCase(TestCase):
             description = "This is a test event",
             date = "2024-04-08",
             time="11:17:00", 
-            is_active=True)
+            is_active=True,
+            calendar=self.calendar)
         
     def test_index_view(self):
         client = Client()
@@ -23,7 +37,7 @@ class EventViewsTestCase(TestCase):
     def test_create_event_view(self):
         #Get form details
         client = Client()
-        response = client.get(reverse('create-event'))
+        response = client.get(reverse('create-event', kwargs={'calendar_id', self.calendar.id}))
         self.assertEqual(response.status_code, 200)
 
         #Post
@@ -41,7 +55,7 @@ class EventViewsTestCase(TestCase):
 
     def test_create_event_view_invalid(self):
         client = Client()
-        response = client.post(reverse('create-event'))
+        response = client.post(reverse('create-event'), kwargs={'calendar_id', self.calendar.id})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This field is required")
 
