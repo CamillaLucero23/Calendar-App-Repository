@@ -5,7 +5,14 @@ from django.contrib.auth.models import User
 # Create your models here.
 class Calendar(models.Model):
 
+    title = models.CharField(max_length=100, blank=True)
+
     #Model Methods
+    class Meta:
+        permissions = [
+            ("can_edit_calendar", "Can Edit Calendar"),
+        ]
+
     #Gets the name of the event and uses that for their display on /admin
     def __str__(self):
         return self.title
@@ -21,10 +28,6 @@ class Member(models.Model):
     user = models.OneToOneField(User,null=True, on_delete=models.CASCADE) #connects user to calendars
     calendar = models.OneToOneField(Calendar,null=True, on_delete=models.CASCADE)
 
-    class Meta:
-        permissions = [
-            ("can_edit_calendar", "Can Edit Calendar"),
-        ]
     #Gets the name of the em and uses that for their display on /admin
     def __str__(self):
         return self.first_name

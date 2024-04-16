@@ -16,6 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from guardian.shortcuts import assign_perm, get_perms
  
 
 # Create your views here.
@@ -75,8 +76,12 @@ def no_permission(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def create_event(request, pk):
-    #post = get_object_or_404(Calendar, pk=pk)
-    #if request.user.has_perm('calendar_app.can_edit_calendar', post):
+    #Get user perms
+    calendar = Calendar.objects.get(id=pk)
+    user = User.objects.get(username=request.user.username)
+    user_has_perms = user.has_perm('calendar_app.can_edit_calendar', calendar)
+
+    if user_has_perms:
         form = EventForm()
         calendar = Calendar.objects.get(pk=pk)
         if request.method == 'POST':
@@ -92,41 +97,55 @@ def create_event(request, pk):
                 event.save()
 
             #redirect
-            return redirect('calendar-detail', pk)
+            return redirect('calendar-detail', calendar.id )
     
         context = {'form': form}
         return render(request, 'calendar_app/create_event.html', context)
-    #else:
-        #return render(request, "calendar_app/no_permission.html")
-
+    else:
+        return render(request, "calendar_app/no_permission.html")
 
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def update_event(request, calendar_id, pk):
-    event = Event.objects.get(id=pk)
-    form = EventForm(instance=event)
+    #Get user perms
+    calendar = Calendar.objects.get(id=calendar_id)
+    user = User.objects.get(username=request.user.username)
+    user_has_perms = user.has_perm('calendar_app.can_edit_calendar', calendar)
+
+    if user_has_perms:
+        event = Event.objects.get(id=pk)
+        form = EventForm(instance=event)
   
-    if request.method == 'POST':
-        #create a new dictionary with form data
-        event_data = request.POST.copy()
-        form = EventForm(event_data, instance=event)
+        if request.method == 'POST':
+            #create a new dictionary with form data
+            event_data = request.POST.copy()
+            form = EventForm(event_data, instance=event)
 
-        if form.is_valid():
-            #Save form without committing
-            event = form.save(commit=False)
-            event.save()
+            if form.is_valid():
+                #Save form without committing
+                event = form.save(commit=False)
+                event.save()
 
-            #redirect
-            return redirect('calendar-detail', pk)
+                #redirect
+                return redirect('calendar-detail', calendar_id)
     
-    context = {'form': form}
-    return render(request, 'calendar_app/update_event.html', context)
+            context = {'form': form}
+            return render(request, 'calendar_app/update_event.html', context)
+        else:
+            return render(request, "calendar_app/no_permission.html")
 
+
+    
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['user_role'])
 def delete_event(request, pk, calendar_id):
-    if request.user.has_perm('calendar_app.can_edit_calendar'):
+    #Get user perms
+    calendar = Calendar.objects.get(id=calendar_id)
+    user = User.objects.get(username=request.user.username)
+    user_has_perms = user.has_perm('calendar_app.can_edit_calendar', calendar)
+
+    if user_has_perms:
         event = Event.objects.get(id=pk)
   
         if request.method == 'POST':
@@ -135,14 +154,14 @@ def delete_event(request, pk, calendar_id):
             event.delete()
 
             #redirect
-            return redirect('calendar-detail', pk)
+            return redirect('calendar-detail', calendar_id)
     
         context = {'event' : event}
         return render(request, 'calendar_app/delete_event.html', context)
     
     else:
         #redirect
-            return redirect('/')
+        return render(request, "calendar_app/no_permission.html")
 
 
 def registerPage(request):
@@ -157,9 +176,12 @@ def registerPage(request):
             group = Group.objects.get(name='user_role')
             user.groups.add(group)
 
+            #Create a calendar for our user
             calendar = Calendar.objects.create()
-            permission = Permission.objects.get(codename='can_edit_calendar')
-            user.user_permissions.add(permission)
+            calendar.title = "Calendar" + str(calendar.id)
+            
+            #Establish User permissions
+            assign_perm('can_edit_calendar', user, calendar)
 
             member = Member.objects.create(user=user)
             member.calendar = calendar

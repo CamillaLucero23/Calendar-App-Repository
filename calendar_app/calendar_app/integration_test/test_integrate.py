@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import BY
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 browser =webdriver.Firefox(
-    service =FirefoService(GeckoDriverManager().install())
+    service =FirefoxService(GeckoDriver().install())
 
 )
 
@@ -109,7 +109,7 @@ class integration_tests(StaticLiveServerTestCase):
         #Add Element
         self.selenium.find_element_by_id('id_title').send_keys('test event')
         self.selenium.find_element_by_id('id_description').send_keys('This is a test event')
-        self.selenium.find_element_by_id('id_date').send_keys(`'')`
+        self.selenium.find_element_by_id('id_date').send_keys('')
         self.selenium.find_element_by_id('id_time').send_keys('11:59:00')
         self.selenium.find_element_by_id('submit').click()
 
